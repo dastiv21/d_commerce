@@ -1,6 +1,5 @@
 media/*
 *.pyc
-*/migrations/0*
 *.sqlite3
 static/CACHE/css/d01918ad94b3.css
 static/CACHE/js/20edf36cbe86.js

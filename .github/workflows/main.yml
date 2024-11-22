@@ -27,3 +27,4 @@ jobs:
         run: |
           python manage.py migrate
           pytest
+        continue-on-error: false

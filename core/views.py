@@ -9,8 +9,9 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from core.models import Product, Order
-from core.serializers import ProductSerializer, UserSerializer, OrderSerializer
+from core.models import Product, Order, ShoppingCart
+from core.serializers import ProductSerializer, UserSerializer, \
+    OrderSerializer, RegisterSerializer, ShoppingCartSerializer
 from core.utils import IsAdminOrReadOnly
 
 
@@ -92,3 +93,33 @@ def product_list(request):
     # Your logic to list products
     pass
     # return Response(product_data)
+
+# views.py
+
+class RegisterView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = RegisterSerializer
+
+@api_view(['POST'])
+def register(request):
+    serializer = RegisterSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class ShoppingCartView(APIView):
+    def get(self, request):
+        try:
+            shopping_cart = ShoppingCart.objects.get(user=request.user)
+            serializer = ShoppingCartSerializer(shopping_cart)
+            return Response(serializer.data)
+        except ShoppingCart.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+    def post(self, request):
+        serializer = ShoppingCartSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

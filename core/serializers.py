@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from core.models import Order, OrderItem, Product, Category, CartItem, \
+from core.models import Order, Product, Category, CartItem, \
     ShoppingCart
 
 
@@ -32,30 +32,12 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'description', 'price', 'stock', 'category']
 
 
-class OrderItemSerializer(serializers.ModelSerializer):
-    product = ProductSerializer(read_only=True)
-    product_id = serializers.PrimaryKeyRelatedField(
-        queryset=Product.objects.all(), source='product', write_only=True)
-
-    class Meta:
-        model = OrderItem
-        fields = ['product', 'product_id', 'quantity']
-
-
 class OrderSerializer(serializers.ModelSerializer):
-    items = OrderItemSerializer(many=True)
 
     class Meta:
         model = Order
-        fields = ['id', 'user', 'created_at', 'updated_at', 'status', 'items']
+        fields = ['id', 'user', 'product','quantity', 'created_at', 'updated_at', 'status']
         read_only_fields = ['id', 'created_at', 'updated_at', 'status', 'user']
-
-    def create(self, validated_data):
-        items_data = validated_data.pop('items')
-        order = Order.objects.create(**validated_data)
-        for item_data in items_data:
-            OrderItem.objects.create(order=order, **item_data)
-        return order
 
 
 class RegisterSerializer(serializers.ModelSerializer):

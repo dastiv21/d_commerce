@@ -14,6 +14,8 @@ from core.serializers import ProductSerializer, UserSerializer, \
     OrderSerializer, RegisterSerializer, ShoppingCartSerializer
 from core.utils import IsAdminOrReadOnly
 
+def home(request):
+    return render(request, "core/home.html")
 
 class LoginView(TokenObtainPairView):
     def post(self, request, *args, **kwargs):
@@ -86,16 +88,6 @@ class AllOrderListView(generics.ListAPIView):
     serializer_class = OrderSerializer
     permission_classes = [IsAdminOrReadOnly]
 
-
-api_view(['GET'])
-@permission_classes([IsAdminOrReadOnly])
-def product_list(request):
-    # Your logic to list products
-    pass
-    # return Response(product_data)
-
-# views.py
-
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = RegisterSerializer
@@ -123,3 +115,83 @@ class ShoppingCartView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from .models import Order
+from .serializers import OrderSerializer
+
+
+class OrderViewSet(viewsets.ModelViewSet):
+    """
+    A viewset for managing orders and their state transitions.
+    """
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+
+    @action(detail=True, methods=['post'])
+    def confirm_order(self, request, pk=None):
+        """
+        Transition the order to 'order_confirmed' state.
+        """
+        order = self.get_object()
+        try:
+            order.confirm_order()
+            order.save()
+            return Response({'status': 'Order confirmed'}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['post'])
+    def dispatch_order(self, request, pk=None):
+        """
+        Transition the order to 'order_dispatched' state.
+        """
+        order = self.get_object()
+        try:
+            order.dispatch_order()
+            order.save()
+            return Response({'status': 'Order dispatched'}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['post'])
+    def deliver_order(self, request, pk=None):
+        """
+        Transition the order to 'order_delivered' state.
+        """
+        order = self.get_object()
+        try:
+            order.deliver_order()
+            order.save()
+            return Response({'status': 'Order delivered'}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['post'])
+    def cancel_order(self, request, pk=None):
+        """
+        Transition the order to 'order_canceled' state.
+        """
+        order = self.get_object()
+        try:
+            order.cancel_order()
+            order.save()
+            return Response({'status': 'Order canceled'}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['post'])
+    def undo_cancel_order(self, request, pk=None):
+        """
+        Undo the cancellation of the order.
+        """
+        order = self.get_object()
+        try:
+            order.undo_cancel_order()
+            order.save()
+            return Response({'status': 'Order cancellation undone'}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)

@@ -85,10 +85,15 @@ WSGI_APPLICATION = "d_commerce.wsgi.application"
 #         'NAME': BASE_DIR / 'test_db.sqlite3',
 #     }
 # }
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': ':memory:',  # Use an in-memory database for faster tests
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'comm',
+        'USER': 'postgres',
+        'PASSWORD': 'pass',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 

@@ -35,7 +35,7 @@ class Order(models.Model):
     quantity = models.PositiveIntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    status = models.CharField(max_lenght=40, choices=STATUS_CHOICES, default='order_placed')
+    status = models.CharField(max_length=40, choices=STATUS_CHOICES, default='order_placed')
 
     def __str__(self):
         return f"{self.quantity} of {self.product.name}"

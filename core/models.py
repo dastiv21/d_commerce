@@ -1,7 +1,5 @@
 from django.contrib.auth.models import User
 from django.db import models
-from django.db.models import Sum
-from django_fsm import FSMField, transition
 
 
 # Create your models here.
@@ -37,7 +35,7 @@ class Order(models.Model):
     quantity = models.PositiveIntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    status = FSMField(choices=STATUS_CHOICES, default='order_placed')
+    status = models.CharField(max_lenght=40, choices=STATUS_CHOICES, default='order_placed')
 
     def __str__(self):
         return f"{self.quantity} of {self.product.name}"
@@ -45,33 +43,33 @@ class Order(models.Model):
     def order_price(self):
         return self.product.price * self.quantity
 
-    @transition(field=status, source='order_placed', target='order_confirmed')
-    def confirm_order(self):
-        """Transition to confirm the order."""
-        pass
+    # @transition(field=status, source='order_placed', target='order_confirmed')
+    # def confirm_order(self):
+    #     """Transition to confirm the order."""
+    #     pass
+    #
+    # @transition(field=status, source='order_confirmed',
+    #             target='order_dispatched')
+    # def dispatch_order(self):
+    #     """Transition to dispatch the order."""
+    #     pass
+    #
+    # @transition(field=status, source='order_dispatched',
+    #             target='order_delivered')
+    # def deliver_order(self):
+    #     """Transition to mark the order as delivered."""
+    #     pass
 
-    @transition(field=status, source='order_confirmed',
-                target='order_dispatched')
-    def dispatch_order(self):
-        """Transition to dispatch the order."""
-        pass
-
-    @transition(field=status, source='order_dispatched',
-                target='order_delivered')
-    def deliver_order(self):
-        """Transition to mark the order as delivered."""
-        pass
-
-    @transition(field=status, source=['order_placed', 'order_confirmed'],
-                target='order_canceled')
-    def cancel_order(self):
-        """Transition to cancel the order."""
-        pass
-
-    @transition(field=status, source='order_canceled', target='order_canceled')
-    def undo_cancel_order(self):
-        """Transition to undo the cancellation of the order."""
-        pass
+    # @transition(field=status, source=['order_placed', 'order_confirmed'],
+    #             target='order_canceled')
+    # def cancel_order(self):
+    #     """Transition to cancel the order."""
+    #     pass
+    #
+    # @transition(field=status, source='order_canceled', target='order_canceled')
+    # def undo_cancel_order(self):
+    #     """Transition to undo the cancellation of the order."""
+    #     pass
 
 class ShoppingCart(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='shopping_cart')
